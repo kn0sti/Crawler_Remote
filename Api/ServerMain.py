@@ -10,13 +10,13 @@ crawler = CrawlerMain()
 def root():
     return {"status" : "server running"}
 
-@app.post("/startCrawler")
+@app.get("/startCrawler")
 def startCrawler():
     if not crawler.running:
         crawler.start()
     return {"status" : "start"}
 
-@app.post("/stopCrawler")
+@app.get("/stopCrawler")
 def stopCrawler():
     crawler.stop()
     return {"status" : "stop"}
