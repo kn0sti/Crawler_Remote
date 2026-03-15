@@ -6,6 +6,10 @@ import uvicorn
 app = FastAPI()
 crawler = CrawlerMain()
 
+#App wird mit Main.py ausgeführt
+def startServer(port = 8080):
+    uvicorn.run("Api.ServerMain:app", host="0.0.0.0", port=port)
+
 @app.get("/")
 def root():
     return {"status" : "server running"}
