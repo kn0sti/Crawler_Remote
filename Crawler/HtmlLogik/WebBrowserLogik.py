@@ -124,15 +124,21 @@ class Logik:
         #startet denn vorgang
         while self.running:
             links = self.getLinkList()
+            print(f"Anzahl geholter Links: {len(links)}")
             for link in links:
+                if not self.running: break
                 self.link = link
                 self.createData()
                 time.sleep(1)
+            db.linksabgeschlossen(links)
 
     #neuer konstruktor
     def __init__(self, test = False):
         self.ordner = "c:/Users/Konstantin/Documents/Orivan/TestDaten/Objekte/Jsonl"
         print(f"Gestartet im Testmodus")
+        self.running = False
+
+    def start(self):
         self.running = True
         self.startCrawl()
 

@@ -13,27 +13,30 @@ def getAllLinks(soup):
     #jeden a durchgehen
     for link in links:
         #value vom link bekommen
-        href = str(link.get("href"))
+        href = link.get("href")
+
+        if href is None:
+            continue
+
         #gleich mal schauen ob es nur der homelink ("/") is
         if len(href) < 2:
             #print(f"Zu kurz: {href}")
             continue
 
         #schauen ob es ein anderer dateityp is
-        if href.__contains__(filters[0]) or href.__contains__(filters[6]) or href.__contains__(filters[7]) or href.__contains__(filters[8]):
+        if href.endswith((".jpg", ".mov", ".mp4", ".php", ".js")) or ":" in href or "#" in href:
             #print(f"Url ist JS oder eine ander Unterseite: {href}")
             continue
 
         #schauen ob es ein link nach außerhalb ist
-        if href.__contains__(filters[1]) or href.__contains__(filters[2]):
+        if href.startswith(filters[1]) or href.startswith(filters[2]):
             dB.insertLink(href)
             counter += 1
             continue
 
         listelinks.append(href)
 
-    #externe links
-    dB.externLinks(externLink)
+    
     return listelinks
 
 # Methode zum entfernen unnützer tags

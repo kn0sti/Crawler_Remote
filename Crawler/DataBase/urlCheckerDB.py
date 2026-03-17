@@ -19,7 +19,7 @@ def delete():
 #links zurücksetzen
 def resetDB():
     conn = createDB()
-    conn.execute("UPDATE visitedURL SET status = (?) Where status = (?)", (0, 1,))
+    conn.execute("UPDATE visitedURL SET status = (?) Where status != (?)", (0, 0,))
     conn.commit()
     conn.close()
 
@@ -30,6 +30,12 @@ def errorLink(link):
     conn.commit()
     conn.close()
 
+def linksabgeschlossen(links):
+    conn = createDB()
+    for link in links:
+        conn.execute("UPDATE visitedURL SET status = (?) Where url = (?) AND status != 2", (3, link,))
+    conn.commit()
+    conn.close()
 
 #liste an links holen
 def getUnbearbeiteteURL(limit):
@@ -82,27 +88,22 @@ def getAll():
     cur.execute("SELECT * FROM visitedURL")
     ans = cur.fetchall()
     return ans
+   
+#get anzahl links
+def getAnzahlLinks():
+    conn = createDB()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM visitedURL")
+    ans = cur.fetchone()[0]
+    return ans
 
-def externLinks(links):
-    try:
-        for link in links:
-            with open(r'C:\Users\Kollmaier\OneDrive - Private Berufsakademie für Aus- und Weiterbildung Passau gGmbH\Dokumente\Privat\PrivatNeu\pythonTest\nextLinks.csv', "a") as f:
-                f.write(link +",\n")
-    except Exception as e:
-        print(f"Fehler beim externen Link schreiben: {e}")
-
-def newLinks(links, url):
-    try:
-        fertigerLink = []
-        for link in links:
-            fertigerLink.append(url + link)
-        for link in fertigerLink:
-            with open(r'C:\Users\Kollmaier\OneDrive - Private Berufsakademie für Aus- und Weiterbildung Passau gGmbH\Dokumente\Privat\PrivatNeu\pythonTest\nextLinks.csv', "a") as f:
-                f.write("http://" + link +",\n")
-    except Exception as e:
-        print(f"Fehler in newLinks: {e}")
-    
+def getAnzahlFertigerLinks():
+    conn = createDB()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM visitedURL WHERE status = 3")
+    ans = cur.fetchone()[0]
+    return ans
 
 if __name__ == "__main__":
-    insertLinks("https://de.wikipedia.org/wiki/Personal_Computer") 
+    resetDB()
 
