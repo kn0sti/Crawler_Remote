@@ -35,8 +35,8 @@ def testCrawler():
 
 @app.get("/getStatus")
 def getStatus():
-    anzahlLinks = db.getAnzahlLinks(), db.getAnzahlFertigerLinks()
-    return {"running" : crawler.running, "Links" : anzahlLinks[0], "Fertig" : anzahlLinks[1]}
+    anzahlLinks = db.getAnzahlLinks(), db.getAnzahlFertigerLinks(), db.getAnzahlFehlerLinks()
+    return {"Läuft" : crawler.running, "Links" : anzahlLinks[0], "Fertig" : anzahlLinks[1], "Fehler" : anzahlLinks[2]}
 
 if __name__ == "__main__":
     uvicorn.run("Api.ServerMain:app", host="0.0.0.0", port=8080)

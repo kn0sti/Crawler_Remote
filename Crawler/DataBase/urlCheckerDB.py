@@ -104,7 +104,13 @@ def getAnzahlFertigerLinks():
     ans = cur.fetchone()[0]
     return ans
 
+def getAnzahlFehlerLinks():
+    conn = createDB()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM visitedURL WHERE status = 2")
+    ans = cur.fetchone()[0]
+    return ans
+
 if __name__ == "__main__":
-    insertLink("https://de.wikipedia.org/wiki/Atari_ST")
-    insertLink("https://de.wikipedia.org/wiki/IBM-PC-kompatibler_Computer")
+    resetDB()
 
