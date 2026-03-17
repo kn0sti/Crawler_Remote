@@ -118,6 +118,8 @@ class Logik:
         if not test:
             ROOT = Path(__file__).resolve().parent.parent.parent
             self.ordner = ROOT / "Data"
+            if not self.ordner.exists():
+                self.ordner.mkdir(parents=True, exist_ok=True)
             print(f"Gestartet im Normalmodus - Daten werden in {self.ordner} gespeichert")
             self.running = False
 
@@ -135,6 +137,7 @@ class Logik:
         print(f"File: {__file__}, Root: {ROOT}, Testordner: {self.ordner}")
         if not self.ordner.exists():
             print("Testordner existiert nicht")
+            self.ordner.mkdir(parents=True, exist_ok=True)
         else:
             print("Testordner existiert")
         
