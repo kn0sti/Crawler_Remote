@@ -10,7 +10,7 @@ class CrawlerMain:
     def start(self):
         try:
             if not self.running:
-                self.logik = wBL.Logik(True)
+                self.logik = wBL.Logik()
                 self.thread = threading.Thread(target=self.logik.start)
                 self.thread.start()
                 self.running = True
@@ -19,6 +19,18 @@ class CrawlerMain:
             print("Fehler beim Starten des Crawlers: ", e)
             return
         
+    def test(self):
+        try:
+            if not self.running:
+                self.logik = wBL.Logik(test=True)
+                self.thread = threading.Thread(target=self.logik.test)
+                self.thread.start()
+                self.running = True
+            print("\nCrawler im Testmodus gestartet\n")
+        except Exception as e:
+            print("Fehler beim Starten des Crawlers im Testmodus: ", e)
+            return
+
 
     def stop(self):
         if self.logik:

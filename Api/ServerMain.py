@@ -27,6 +27,12 @@ def stopCrawler():
     crawler.stop()
     return {"status" : "stop"}
 
+@app.get("/testCrawler")
+def testCrawler():
+    if not crawler.running:
+        crawler.test()
+    return {"status" : "test"}
+
 @app.get("/getStatus")
 def getStatus():
     anzahlLinks = db.getAnzahlLinks(), db.getAnzahlFertigerLinks()

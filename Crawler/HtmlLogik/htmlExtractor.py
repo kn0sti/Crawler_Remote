@@ -24,7 +24,7 @@ def getAllLinks(soup):
             continue
 
         #schauen ob es ein anderer dateityp is
-        if href.endswith((".jpg", ".mov", ".mp4", ".php", ".js")) or ":" in href or "#" in href:
+        if href.endswith((".jpg", ".mov", ".mp4", ".php", ".js")) or ":" in href or "#" in href or ".php" in href:
             #print(f"Url ist JS oder eine ander Unterseite: {href}")
             continue
 

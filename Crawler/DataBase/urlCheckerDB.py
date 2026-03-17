@@ -105,5 +105,6 @@ def getAnzahlFertigerLinks():
     return ans
 
 if __name__ == "__main__":
-    resetDB()
+    insertLink("https://de.wikipedia.org/wiki/Atari_ST")
+    insertLink("https://de.wikipedia.org/wiki/IBM-PC-kompatibler_Computer")
 

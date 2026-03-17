@@ -4,6 +4,7 @@ from Crawler.Chunks import chunker as ch
 import logs.errorLogNetwork as eL
 import logs.errorLogLinkFile as elF
 from Crawler.DataBase import urlCheckerDB as db
+from pathlib import Path
 
 def openPage(link, url):
     link = link + url
@@ -33,29 +34,6 @@ class Logik:
             print(f"Fehler in getLinkList(): {e}")
         return False
     
-    #methode zum auswerten der listen
-    #def getArray(self):
-        typ = self.link.split(".")
-        counter = 0
-        if(typ[-1] == "csv"):
-            with open(self.link, mode="r") as Datei:
-                csvDatei = csv.reader(Datei)
-                for Zeilen in csvDatei:
-                    #counter für anzeige
-                    counter += 1
-                    self.indE.counter(counter, len(Zeilen))
-                    for obj in Zeilen:
-                        if(obj != ""):
-                            if not (db.checkDB(str(obj))):
-                                self.link = obj
-                                self.startCrawl()
-                                print(f"Fertig mit{self.link}")
-                                time.sleep(60)
-                            else:
-                                print(f"Datensatz wurde schon bearbeitet: {str(obj)}")
-                                time.sleep(10)
-                                continue
-                print("Alle Daten durch!")
 
     #methode zum link zerlegen
     def getHost(self):
@@ -70,7 +48,7 @@ class Logik:
     #methode zur jsonl dateierstellung
     def createData(self):
         dateiname = self.getHost()
-        link = "".join(self.ordner)
+        link = "" + str(self.ordner)
         link = link + "/" + str(dateiname)
         try:
             html = self.getHtml()
@@ -124,6 +102,9 @@ class Logik:
         #startet denn vorgang
         while self.running:
             links = self.getLinkList()
+            if len(links) == 0:
+                print("Keine neuen Links gefunden...")
+                self.running = False
             print(f"Anzahl geholter Links: {len(links)}")
             for link in links:
                 if not self.running: break
@@ -134,9 +115,11 @@ class Logik:
 
     #neuer konstruktor
     def __init__(self, test = False):
-        self.ordner = "c:/Users/Konstantin/Documents/Orivan/TestDaten/Objekte/Jsonl"
-        print(f"Gestartet im Testmodus")
-        self.running = False
+        if not test:
+            ROOT = Path(__file__).resolve().parent.parent.parent
+            self.ordner = ROOT / "Data"
+            print(f"Gestartet im Normalmodus - Daten werden in {self.ordner} gespeichert")
+            self.running = False
 
     def start(self):
         self.running = True
@@ -145,10 +128,18 @@ class Logik:
     def stop(self):
         self.running = False
         print("Crawler stopped")
+
+    def test(self):
+        ROOT = Path(__file__).resolve().parent.parent.parent
+        self.ordner = ROOT / "Data"
+        print(f"File: {__file__}, Root: {ROOT}, Testordner: {self.ordner}")
+        if not self.ordner.exists():
+            print("Testordner existiert nicht")
+        else:
+            print("Testordner existiert")
         
         
 
 #unittest oder so
 if __name__ == "__main__":
-    m = Logik("c:/Users/Konstantin/Documents/Orivan/TestDaten/Objekte", "", "https://de.wikipedia.org/wiki/Personal_Computear", "", True)
-    print()
+    m = Logik(test=True)
