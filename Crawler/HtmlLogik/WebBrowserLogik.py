@@ -1,6 +1,9 @@
-import webbrowser, requests, datetime, time, csv, HtmlLogik as hE, Chunks as ch, json
-from logs import errorLogNetwork as eL, errorLogLinkFile as elF
-from DataBase import urlCheckerDB as db
+import webbrowser, requests, datetime, time, csv, json
+from Crawler.HtmlLogik import htmlExtractor as hE
+from Crawler.Chunks import chunker as ch
+import logs.errorLogNetwork as eL
+import logs.errorLogLinkFile as elF
+from Crawler.DataBase import urlCheckerDB as db
 
 def openPage(link, url):
     link = link + url
@@ -13,15 +16,25 @@ class Logik:
             headers = {'User-Agent': 'KonstiCrawler (educational project, polite crawler) (contact: konstikollmaier@gmail.com)'}
             answer = requests.get(self.link, headers=headers)
             html = answer.content.decode("utf-8")
-            self.indE.updateLadeBar(40)
             return html
         except Exception as e:
             print(f"Fehler beim getHtml: {e}")
+            db.errorLink(self.link)
             eL.writeLog(answer, self.link, str(datetime.datetime.now()))
             return answer
 
+    #Auswertung von Datenbank und vorladen der links
+    def getLinkList(self):
+        liste = []
+        try:
+            liste = db.getUnbearbeiteteURL(50)
+            return liste
+        except Exception as e:
+            print(f"Fehler in getLinkList(): {e}")
+        return False
+    
     #methode zum auswerten der listen
-    def getArray(self):
+    #def getArray(self):
         typ = self.link.split(".")
         counter = 0
         if(typ[-1] == "csv"):
@@ -62,6 +75,7 @@ class Logik:
         try:
             html = self.getHtml()
             if not(isinstance("Response", type(html))):
+                db.errorLink(self.link)
                 print("Rückgabe Fehlerhaft!")
                 return None
             else:
@@ -70,7 +84,14 @@ class Logik:
                 try:
                     #html von request filter und in list zurück geben
                     self.cleanHtml = hE.getTitelandMain(html)
-                    db.newLinks(self.cleanHtml[2], self.host[0])
+                    #interne links parsen und speichern
+                    for link in self.cleanHtml[2]:
+                        try:
+                            link = "http://" + self.host[0] + "/" + link
+                            db.insertLink(link)
+                        except Exception as e:
+                            elF.writeFileLog(link, str(e), str(datetime.datetime.now()))
+                            print(f"Fehler beim parsen interner Links: {e}")
                 except Exception as e:
                     elF.writeFileLog(self.link, str(e), str(datetime.datetime.now()))
                     print("Fehler bei Tags entfernen", e)
@@ -79,7 +100,7 @@ class Logik:
                     #chunken in längen von 1500 zeichen
                     self.chunks = ch.getTextInChunks(self.cleanHtml[1])
                 except Exception as e:
-                    #elF.writeFileLog(self.link, str(e), str(datetime.datetime.now()))
+                    elF.writeFileLog(self.link, str(e), str(datetime.datetime.now()))
                     print("Fehler beim chunken", e)
                     return None
                 #für jeden chunk ein objekt erstellen und in text datei schreiben
@@ -91,7 +112,6 @@ class Logik:
                         "chunk": f"{chunk}"
                     }
                     self.data.write(json.dumps(jsonObjekt, ensure_ascii=False ))
-                self.indE.updateLadeBar(100)
                 db.insertLink(self.link)
                 return None
         except Exception as e:
@@ -102,30 +122,25 @@ class Logik:
     #start
     def startCrawl(self):
         #startet denn vorgang
-        self.createData()
+        while self.running:
+            links = self.getLinkList()
+            for link in links:
+                self.link = link
+                self.createData()
+                time.sleep(1)
+
+    #neuer konstruktor
+    def __init__(self, test = False):
+        self.ordner = "c:/Users/Konstantin/Documents/Orivan/TestDaten/Objekte/Jsonl"
+        print(f"Gestartet im Testmodus")
+        self.running = True
+        self.startCrawl()
+
+    def stop(self):
+        self.running = False
+        print("Crawler stopped")
         
-    #konstruktor
-    def __init__(self, ordner, list, link, instanceDE, test = False):
-        self.indE = instanceDE  
-        self.link = link
-        self.list = list
-        self.ordner = ordner
-
-        if test:
-            print(f"Test für lokale ausführung")
-            a = self.getHost()
-            print(f"Dateiname: {self.DateiName}")
-            a = self.ordner + "/" + a
-            print(f"Veränderter Dateiname: {a}")
-
-        else:
-            if self.list:
-                self.array = self.getArray()
-            else:
-                self.startCrawl()
-                print(f"Fertig mit {self.host[1]}")
         
-
 
 #unittest oder so
 if __name__ == "__main__":

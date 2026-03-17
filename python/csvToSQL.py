@@ -1,4 +1,4 @@
-from Crawler.DataBase import urlCheckerDB as DB
+#from Crawler.DataBase import urlCheckerDB as DB
 import csv, sqlite3
 from pathlib import Path
 

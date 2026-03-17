@@ -6,6 +6,7 @@ import uvicorn
 app = FastAPI()
 crawler = CrawlerMain()
 
+#Wenn windows Ausgeführt wird, http://192.168.178.102:8080/startCrawler
 #App wird mit Main.py ausgeführt
 def startServer(port = 8080):
     uvicorn.run("Api.ServerMain:app", host="0.0.0.0", port=port)

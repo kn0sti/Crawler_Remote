@@ -1,34 +1,61 @@
 import sqlite3
 
 def createDB():
-    conn = sqlite3.connect("URLS.db")
+    conn = sqlite3.connect("URLS.db", timeout=30)
     cur = conn.cursor()
     #Status: 0 - Unbearbeitet | 1 - Geladen | 2 - Fehler | 3 - Fertig
-    cur.execute("CREATE TABLE IF NOT EXISTS visitedURL (url TEXT PRIMARY KEY, status INT, number INT AUTO_INCREMENT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS visitedURL (url TEXT PRIMARY KEY UNIQUE, status INT, number INT AUTO_INCREMENT)")
     conn.commit()
     return conn
 
 # == ÜBERARBEITEN ==
 
+def delete():
+    conn = createDB()
+    conn.execute("DELETE FROM visitedURL WHERE url = (?)", ("wikipedia.com",))
+    conn.commit()
+    conn.close()
+
+#links zurücksetzen
+def resetDB():
+    conn = createDB()
+    conn.execute("UPDATE visitedURL SET status = (?) Where status = (?)", (0, 1,))
+    conn.commit()
+    conn.close()
+
+#error handling links
+def errorLink(link):
+    conn = createDB()
+    conn.execute("UPDATE visitedURL SET status = (?) Where url = (?)", (2, link,))
+    conn.commit()
+    conn.close()
+
+
 #liste an links holen
-def getUnbearbeiteteURL(finish):
+def getUnbearbeiteteURL(limit):
     conn = createDB()
     cur = conn.cursor()
-    ans = []
-    for i in range(finish + 1):
-        #Nächstest link objekt holen
-        cur.execute("SELECT * FROM visitedURL where status = 0")
-        #link zur liste hinzu fügen
-        ans.append(cur.fetchall())
-        #kurze zwischen bearbeitung
-        url = ans[i]
-        #link auf 1 also geladen setzen
-        conn.execute("UPDATE visitedURL set status = 1 where (?)", (url[0]))
-        conn.commit()
-    #verbindung schließen
+
+    # Links holen
+    cur.execute(
+        "SELECT url FROM visitedURL WHERE status = 0 LIMIT ?",
+        (limit,)
+    )
+
+    rows = cur.fetchall()
+
+    urls = [row[0] for row in rows]
+
+    # Status auf bearbeitet setzen
+    cur.executemany(
+        "UPDATE visitedURL SET status = 1 WHERE url = ?",
+        [(url,) for url in urls]
+    )
+
+    conn.commit()
     conn.close()
-    #liste zurückgeben
-    return ans
+
+    return urls
 
 #links einfügen
 def insertLinks(link):
@@ -36,26 +63,17 @@ def insertLinks(link):
         conn = createDB()
         try:
             conn.execute("INSERT INTO visitedURL(url, status) VALUES (?, ?)", (link, 0,))
-            conn.commit()
-            conn.close()
         except Exception as e:
-            print(f"Fehler in {link}: {e}")
+            print(f"Fehler in insertLinks bei {link}: {e}")
             return False
+        conn.commit()
         conn.close()
         return True
     return False
 
-def checkDB(link) -> bool:
-    conn = createDB()
-    cur = conn.cursor()
-    cur.execute("SELECT 1 FROM visitedURL WHERE url = (?)", (link,))
-    b00l = cur.fetchone() is not None
-    conn.close()
-    return b00l
-
 def insertLink(link):
     conn = createDB()
-    conn.execute("INSERT INTO visitedURL(url, status) VALUES (?, ?)", (link, 0,))
+    conn.execute("INSERT OR IGNORE INTO visitedURL(url, status) VALUES (?, ?)", (link, 0,))
     conn.commit()
 
 def getAll():
@@ -86,5 +104,5 @@ def newLinks(links, url):
     
 
 if __name__ == "__main__":
-    insertLink("wikipedia.com")
+    insertLinks("https://de.wikipedia.org/wiki/Personal_Computer") 
 

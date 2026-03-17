@@ -1,14 +1,22 @@
-from DataBase import urlCheckerDB
+from Crawler.HtmlLogik import WebBrowserLogik as wBL
 
 class CrawlerMain:
     def __init__(self):
         self.running = False
+        self.logik = None
 
     def start(self):
-        self.running = True
-        print("Crawler started")
-        urlCheckerDB.insertLinks("https://wikipeda.com")
+        try:
+            self.logik = wBL.Logik(True)
+            self.running = True
+            print("\nCrawler started\n")
+        except Exception as e:
+            print("Fehler beim Starten des Crawlers: ", e)
+            return
+        
 
     def stop(self):
+        if self.logik:
+            self.logik.stop()
         self.running = False
-        print("Crawler stopped")
+        print("\nCrawler stopped\n")

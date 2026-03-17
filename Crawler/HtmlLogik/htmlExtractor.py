@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup as BS
 import re
-from DataBase import urlCheckerDB as dB
+from Crawler.DataBase import urlCheckerDB as dB
 
 #link finder
 def getAllLinks(soup):
@@ -9,10 +9,11 @@ def getAllLinks(soup):
     listelinks = []
     externLink = []
     filters = ["#", "https://", "http://", ".jpg", ".mov", ".mp4", ":", ".php", ".js"]
+    counter = 0
     #jeden a durchgehen
     for link in links:
         #value vom link bekommen
-        href = link.get("href")
+        href = str(link.get("href"))
         #gleich mal schauen ob es nur der homelink ("/") is
         if len(href) < 2:
             #print(f"Zu kurz: {href}")
@@ -25,7 +26,8 @@ def getAllLinks(soup):
 
         #schauen ob es ein link nach außerhalb ist
         if href.__contains__(filters[1]) or href.__contains__(filters[2]):
-            externLink.append(href)
+            dB.insertLink(href)
+            counter += 1
             continue
 
         listelinks.append(href)
