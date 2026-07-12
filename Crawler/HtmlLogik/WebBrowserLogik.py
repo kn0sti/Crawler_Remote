@@ -102,6 +102,9 @@ class Logik:
         #startet denn vorgang
         while self.running:
             links = self.getLinkList()
+            if self.extra != "":
+                links.append(self.extra)
+                print(f"Der Link:{self.extra} wird auch mit abgefarmt...")
             if len(links) == 0:
                 print("Keine neuen Links gefunden...")
                 self.running = False
@@ -112,10 +115,20 @@ class Logik:
                 self.createData()
                 time.sleep(1)
             db.linksabgeschlossen(links)
+            self.extra = ""
 
     #neuer konstruktor
-    def __init__(self, test = False):
+    def __init__(self, test = False, link = ""):
         if not test:
+            ROOT = Path(__file__).resolve().parent.parent.parent
+            self.ordner = ROOT / "Data"
+            if not self.ordner.exists():
+                self.ordner.mkdir(parents=True, exist_ok=True)
+            print(f"Gestartet im Normalmodus - Daten werden in {self.ordner} gespeichert")
+            self.running = False
+        else:
+            #extra link übergabe
+            self.extra = link
             ROOT = Path(__file__).resolve().parent.parent.parent
             self.ordner = ROOT / "Data"
             if not self.ordner.exists():
@@ -140,6 +153,8 @@ class Logik:
             self.ordner.mkdir(parents=True, exist_ok=True)
         else:
             print("Testordner existiert")
+        self.running = True
+        self.startCrawl()
         
         
 

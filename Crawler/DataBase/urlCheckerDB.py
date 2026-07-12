@@ -110,7 +110,15 @@ def getAnzahlFehlerLinks():
     cur.execute("SELECT COUNT(*) FROM visitedURL WHERE status = 2")
     ans = cur.fetchone()[0]
     return ans
+    
+def getAnzahlAndererLinks():
+    conn = createDB()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*)FROM visitedURL WHERE status = 0 AND url LIKE '%wikipedia%';")
+    ans = cur.fetchone()[0]
+    print(f"Anzahl anderer Links: {ans}")
+    return ans
 
 if __name__ == "__main__":
-    resetDB()
+    getAnzahlAndererLinks()
 

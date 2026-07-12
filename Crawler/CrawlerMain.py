@@ -10,7 +10,7 @@ class CrawlerMain:
     def start(self):
         try:
             if not self.running:
-                self.logik = wBL.Logik()
+                self.logik = wBL.Logik(test=False)
                 self.thread = threading.Thread(target=self.logik.start)
                 self.thread.start()
                 self.running = True
@@ -22,7 +22,7 @@ class CrawlerMain:
     def test(self):
         try:
             if not self.running:
-                self.logik = wBL.Logik(test=True)
+                self.logik = wBL.Logik(test=True, link = "")
                 self.thread = threading.Thread(target=self.logik.test)
                 self.thread.start()
                 self.running = True
